@@ -13,6 +13,14 @@ object WordCount {
         // 创建 SparkContext 对象
         val sc = new SparkContext(conf)
 
+        wordCount_1(sc)
+//        wordCount_2(sc)
+
+        // 停止 SparkContext
+        sc.stop()
+    }
+
+    def wordCount_1(sc: SparkContext): Unit = {
         // 读取文本文件
         val lines: RDD[String] = sc.textFile("src/main/resources/input.txt")
 
@@ -24,8 +32,14 @@ object WordCount {
 
         // 输出结果
         wordCounts.collect().foreach(println)
+    }
 
-        // 停止 SparkContext
-        sc.stop()
+    def wordCount_2(sc: SparkContext): Unit = {
+        // WordCount 方法2
+        val rdd: RDD[String] = sc.makeRDD(List("Hello Scala", "Hello Spark"))
+        val words = rdd.flatMap(_.split(" "))
+        val group: RDD[(String, Iterable[String])] = words.groupBy(word => word)
+        val wordCount: RDD[(String, Int)] = group.mapValues(iter => iter.size)
+        wordCount.collect().foreach(println)
     }
 }
